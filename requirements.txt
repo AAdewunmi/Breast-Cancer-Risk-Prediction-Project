@@ -1,0 +1,20 @@
+# Core runtime (Keras 3 integrated via tf.keras)
+tensorflow>=2.17.0
+
+# Numerics & data
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.4
+
+# Imaging & plotting
+opencv-python>=4.9
+Pillow>=10.0
+matplotlib>=3.8
+
+# Utils
+tqdm>=4.66
+
+# Notes:
+# - If you're on Apple Silicon locally, you may prefer:
+#   tensorflow-macos>=2.17.0
+# - In headless servers, you can replace opencv-python with opencv-python-headless.
