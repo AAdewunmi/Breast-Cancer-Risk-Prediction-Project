@@ -1,0 +1,43 @@
+# Core runtime (Keras 3 integrated via tf.keras)
+Django>=5.0,<6.0
+python-dotenv>=1.0
+dj-database-url>=2.2
+
+# ---- TensorFlow (platform-aware pins) ----
+# macOS Intel (local dev) — TF 2.10 is the last x86_64 macOS wheel and needs Python < 3.11
+tensorflow==2.10.1; platform_system == "Darwin" and platform_machine == "x86_64" and python_version < "3.11"
+numpy==1.23.*;      platform_system == "Darwin" and platform_machine == "x86_64" and python_version < "3.11"
+h5py==3.7.*;        platform_system == "Darwin" and platform_machine == "x86_64" and python_version < "3.11"
+grpcio==1.48.2;     platform_system == "Darwin" and platform_machine == "x86_64" and python_version < "3.11"
+
+# macOS Apple Silicon (arm64)
+tensorflow-macos==2.16.1; platform_system == "Darwin" and platform_machine == "arm64" and python_version < "3.12"
+numpy>=1.26,<2.0;         platform_system == "Darwin" and platform_machine == "arm64" and python_version < "3.12"
+h5py>=3.9,<4;             platform_system == "Darwin" and platform_machine == "arm64" and python_version < "3.12"
+
+# Linux/Windows (CI)
+tensorflow==2.16.1; platform_system != "Darwin" and python_version < "3.12"
+numpy>=1.26,<2.0;   platform_system != "Darwin" and python_version < "3.12"
+h5py>=3.9,<4;       platform_system != "Darwin" and python_version < "3.12"
+
+# ---- Dev/test tooling ----
+tqdm>=4.66
+pytest>=8.1
+pytest-django>=4.8
+factory-boy>=3.3
+
+# Numerics & data
+scikit-learn>=1.4
+
+# Imaging & plotting
+opencv-python>=4.9
+Pillow>=10.0
+matplotlib>=3.8
+
+# Utils
+tqdm>=4.66
+
+# Notes:
+# - If you're on Apple Silicon locally, you may prefer:
+#   tensorflow-macos>=2.17.0
+# - In headless servers, you can replace opencv-python with opencv-python-headless.
