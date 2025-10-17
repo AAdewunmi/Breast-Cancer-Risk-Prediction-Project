@@ -11,6 +11,12 @@ from django.middleware.csrf import get_token
 from django.shortcuts import render
 from .forms import ImagePredictForm, RiskFactorsForm
 from .services.inference import run_image_model, run_factors_model, ensemble
+# predictor/views.py (imports)
+from .forms import ImagePredictForm, ApiImagePredictForm, RiskFactorsForm
+from django.http import JsonResponse, HttpRequest
+from django.views.decorators.http import require_http_methods
+from .forms import ApiImagePredictForm, RiskFactorsForm
+from .services.inference import run_image_model, run_factors_model, ensemble
 
 
 def about(request: HttpRequest):
@@ -79,18 +85,29 @@ def api_predict(request: HttpRequest):
       { "p_img": float, "p_factors": float, "p_ensemble": float,
         "weights": {"image": float, "factors": float} }
     """
-    img_form = ImagePredictForm(request.POST, request.FILES)
+    img_form = ApiImagePredictForm(request.POST, request.FILES)
     rf_form = RiskFactorsForm(request.POST)
 
-    if not (img_form.is_valid() and rf_form.is_valid()):
-        return HttpResponseBadRequest(JsonResponse({
-            "errors": {"image": img_form.errors, "factors": rf_form.errors}
-        }))
+    # Invalid payload → JSON 400 with details
+    if not img_form.is_valid() or not rf_form.is_valid():
+        return JsonResponse(
+            {"errors": {"image": img_form.errors, "factors": rf_form.errors}},
+            status=400,
+        )
 
-    p_img = run_image_model(request.FILES["image"].read())
+    # Happy path
+    image_file = request.FILES["image"]
+    p_img = run_image_model(image_file.read())
     p_fac = run_factors_model(rf_form.to_dataclass())
     res = ensemble(p_img, p_fac)
-    return JsonResponse({
-        "p_img": res.p_img, "p_factors": res.p_factors, "p_ensemble": res.p_ensemble,
-        "weights": {"image": res.img_weight, "factors": res.factors_weight},
-    })
+
+    return JsonResponse(
+        {
+            "p_img": res.p_img,
+            "p_factors": res.p_factors,
+            "p_ensemble": res.p_ensemble,
+            "weights": {"image": res.img_weight, "factors": res.factors_weight},
+        },
+        status=200,
+    )
+

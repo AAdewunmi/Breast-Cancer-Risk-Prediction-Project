@@ -48,6 +48,13 @@ WSGI_APPLICATION = "breast_risk_site.wsgi.application"
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Auto-create in dev/tests so Django stops warning
+if DEBUG:
+    os.makedirs(STATIC_ROOT, exist_ok=True)
+
 STATICFILES_DIRS = [BASE_DIR / "predictor" / "static"]
 
 # Model & inference settings
