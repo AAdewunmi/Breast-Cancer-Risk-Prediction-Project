@@ -1,28 +1,26 @@
 """Schemas and constants used by forms and views."""
 
-# predictor/schemas.py
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional
 
 # Keep any UI choice lists here too (no heavy deps).
-HRT_CHOICES = [(0, "Never/Unknown"), (1, "Former"), (2, "Current")]
+MAG_CHOICES = [(40, "40x"), (100, "100x")]
+HRT_CHOICES = [(0, "Never"), (1, "Former"), (2, "Current")]
 SMOKE_CHOICES = [(0, "Never"), (1, "Former"), (2, "Current")]
-MAG_CHOICES = [(224, "224×224")]
 
-@dataclass(frozen=True)
+
+@dataclass
 class RiskFactors:
     age: float
     first_degree_relative: int
-    onset_age_relative: Optional[float] = None
+    onset_age_relative: float | None = None
     brca1: int = 0
     brca2: int = 0
-    menarche_age: Optional[float] = None
-    menopause_age: Optional[float] = None
-    parity: Optional[float] = None
+    menarche_age: float | None = None
+    menopause_age: float | None = None
+    parity: float | None = None
     hrt: int = 0
-    bmi: Optional[float] = None
-    alcohol_units_per_week: Optional[float] = None
+    bmi: float | None = None
+    alcohol_units_per_week: float | None = None
     smoking_status: int = 0
-    activity_hours_per_week: Optional[float] = None
-
+    activity_hours_per_week: float | None = None

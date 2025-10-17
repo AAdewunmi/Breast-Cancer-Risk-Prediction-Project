@@ -2,39 +2,25 @@
 
 from __future__ import annotations
 from django import forms
-from .schemas import MAG_CHOICES, HRT_CHOICES, SMOKE_CHOICES, RiskFactors
+from .schemas import HRT_CHOICES, MAG_CHOICES, RiskFactors, SMOKE_CHOICES
 
 
 class ImagePredictForm(forms.Form):
-    """UI form: image upload + consent required."""
-
-    image = forms.ImageField(required=True)
-    magnification = forms.ChoiceField(choices=MAG_CHOICES, required=False)
-    consent = forms.BooleanField(
-        required=True,
-        label="I understand this is a research prototype and not diagnostic.",
-    )
-
-    def clean_image(self):
-        f = self.cleaned_data["image"]
-        if f.content_type not in ("image/png", "image/jpeg"):
-            raise forms.ValidationError("Please upload a PNG or JPG image.")
-        if f.size > 10 * 1024 * 1024:
-            raise forms.ValidationError("Image size must be ≤ 10 MB.")
-        return f
+    image = forms.ImageField()
+    magnification = forms.ChoiceField(choices=MAG_CHOICES, initial=40)
 
 
 class ApiImagePredictForm(ImagePredictForm):
-    """API variant: consent optional for programmatic access."""
-
-    consent = forms.BooleanField(required=False)
+    """Same fields as ImagePredictForm; kept separate for future API tweaks."""
+    pass
 
 
 class RiskFactorsForm(forms.Form):
-    """Structured risk factors with basic + cross-field validation."""
-
     age = forms.FloatField(min_value=0, max_value=120)
-    first_degree_relative = forms.ChoiceField(choices=[(1, "Yes"), (0, "No")], initial=0)
+    first_degree_relative = forms.ChoiceField(
+        choices=[(1, "Yes"), (0, "No")],
+        initial=0,
+    )
     onset_age_relative = forms.FloatField(required=False, min_value=0, max_value=120)
     brca1 = forms.BooleanField(required=False, initial=False)
     brca2 = forms.BooleanField(required=False, initial=False)
@@ -43,9 +29,17 @@ class RiskFactorsForm(forms.Form):
     parity = forms.FloatField(required=False, min_value=0, max_value=20)
     hrt = forms.ChoiceField(choices=HRT_CHOICES, initial=0)
     bmi = forms.FloatField(required=False, min_value=8, max_value=70)
-    alcohol_units_per_week = forms.FloatField(required=False, min_value=0, max_value=100)
+    alcohol_units_per_week = forms.FloatField(
+        required=False,
+        min_value=0,
+        max_value=100,
+    )
     smoking_status = forms.ChoiceField(choices=SMOKE_CHOICES, initial=0)
-    activity_hours_per_week = forms.FloatField(required=False, min_value=0, max_value=168)
+    activity_hours_per_week = forms.FloatField(
+        required=False,
+        min_value=0,
+        max_value=168,
+    )
 
     def clean(self):
         cleaned = super().clean()
@@ -60,22 +54,28 @@ class RiskFactorsForm(forms.Form):
 
     def to_dataclass(self) -> RiskFactors:
         cd = self.cleaned_data
-
-        def opt_float(x):
-            return None if x in (None, "") else float(x)
-
         return RiskFactors(
             age=float(cd["age"]),
             first_degree_relative=int(cd["first_degree_relative"]),
-            onset_age_relative=opt_float(cd.get("onset_age_relative")),
+            onset_age_relative=float(cd["onset_age_relative"])
+            if cd.get("onset_age_relative") is not None
+            else None,
             brca1=1 if cd.get("brca1") else 0,
             brca2=1 if cd.get("brca2") else 0,
-            menarche_age=opt_float(cd.get("menarche_age")),
-            menopause_age=opt_float(cd.get("menopause_age")),
-            parity=opt_float(cd.get("parity")),
+            menarche_age=float(cd["menarche_age"])
+            if cd.get("menarche_age") is not None
+            else None,
+            menopause_age=float(cd["menopause_age"])
+            if cd.get("menopause_age") is not None
+            else None,
+            parity=float(cd["parity"]) if cd.get("parity") is not None else None,
             hrt=int(cd["hrt"]),
-            bmi=opt_float(cd.get("bmi")),
-            alcohol_units_per_week=opt_float(cd.get("alcohol_units_per_week")),
+            bmi=float(cd["bmi"]) if cd.get("bmi") is not None else None,
+            alcohol_units_per_week=float(cd["alcohol_units_per_week"])
+            if cd.get("alcohol_units_per_week") is not None
+            else None,
             smoking_status=int(cd["smoking_status"]),
-            activity_hours_per_week=opt_float(cd.get("activity_hours_per_week")),
+            activity_hours_per_week=float(cd["activity_hours_per_week"])
+            if cd.get("activity_hours_per_week") is not None
+            else None,
         )
