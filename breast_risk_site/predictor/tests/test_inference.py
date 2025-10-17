@@ -2,7 +2,11 @@ from io import BytesIO
 
 from PIL import Image
 
-from predictor.services.inference import ensemble, run_factors_model, run_image_model
+from predictor.services.inference import (
+    ensemble,
+    run_factors_model,
+    run_image_model,
+)
 from predictor.services.preprocess import RiskFactors
 
 
