@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{% block title %}Breast Cancer Risk Prediction{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}"/>
+</head>
+<body>
+<header role="banner" class="container">
+  <nav aria-label="Main">
+    <a href="{% url 'predictor:predict' %}">Predict</a>
+    <a href="{% url 'predictor:about' %}">About</a>
+    <a href="{% url 'predictor:resources' %}">Resources</a>
+    <a href="{% url 'predictor:privacy' %}">Privacy</a>
+  </nav>
+</header>
+<main id="content" class="container" tabindex="-1">
+  {% block content %}{% endblock %}
+</main>
+<footer class="container">
+  <p><strong>Disclaimer:</strong> Prototype. Not for diagnostic use.</p>
+</footer>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
