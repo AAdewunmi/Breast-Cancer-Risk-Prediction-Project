@@ -1,11 +1,8 @@
 """Django forms for image upload and risk-factor inputs."""
 
 from __future__ import annotations
-
 from django import forms
-
-from .schemas import HRT_CHOICES, MAG_CHOICES, SMOKE_CHOICES
-from .services.preprocess import RiskFactors
+from .schemas import MAG_CHOICES, HRT_CHOICES, SMOKE_CHOICES, RiskFactors
 
 
 class ImagePredictForm(forms.Form):
