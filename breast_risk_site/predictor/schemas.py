@@ -1,6 +1,7 @@
 """Schemas and constants used by forms and views."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 # Keep any UI choice lists here too (no heavy deps).
