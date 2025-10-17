@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Predict — Breast Cancer Risk{% endblock %}
+
+{% block content %}
+<h1>Multi-Modal Prediction (Image + Risk Factors)</h1>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="grid">
+    <section aria-labelledby="img-section">
+      <h2 id="img-section">Image Upload</h2>
+      {% include "predictor/_image_form.html" with form=img_form %}
+    </section>
+    <section aria-labelledby="factors-section">
+      <h2 id="factors-section">Risk Factors</h2>
+      {% include "predictor/_factors_form.html" with form=rf_form %}
+    </section>
+  </div>
+
+  <div class="actions">
+    <button type="submit">Review & Predict</button>
+  </div>
+</form>
+
+{% if result %}
+  {% include "predictor/_results_ensemble.html" with result=result %}
+{% endif %}
+
+{% if errors %}
+  <div role="alert" class="error">Please correct the errors highlighted below.</div>
+{% endif %}
+{% endblock %}
