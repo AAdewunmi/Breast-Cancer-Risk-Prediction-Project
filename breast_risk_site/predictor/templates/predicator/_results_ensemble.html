@@ -1,0 +1,9 @@
+<div class="card">
+  <h2>Results (Ensemble)</h2>
+  <p><strong>Overall Risk:</strong> {{ result.p_ensemble|floatformat:2 }}</p>
+  <ul>
+    <li>Image model: {{ result.p_img|floatformat:2 }} (weight {{ result.img_weight|floatformat:2 }})</li>
+    <li>Factors model: {{ result.p_factors|floatformat:2 }} (weight {{ result.factors_weight|floatformat:2 }})</li>
+  </ul>
+  <p class="note">This tool is not a medical device and is not for diagnostic use.</p>
+</div>
