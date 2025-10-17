@@ -1,0 +1,15 @@
+<div class="card">
+  <!-- Example subset; include all fields as in the form -->
+  <div class="field"><label>Age</label>{{ form.age }}{% for e in form.age.errors %}<div class="error">{{ e }}</div>{% endfor %}</div>
+  <fieldset>
+    <legend>Family History</legend>
+    <div class="field"><label>First-degree relative</label>{{ form.first_degree_relative }}</div>
+    <div class="field"><label>Onset age (relative)</label>{{ form.onset_age_relative }}</div>
+  </fieldset>
+  <fieldset>
+    <legend>Genetic markers</legend>
+    <label>{{ form.brca1 }} BRCA1</label>
+    <label>{{ form.brca2 }} BRCA2</label>
+  </fieldset>
+  <!-- Continue for HRT, BMI, alcohol, smoking, activity, etc. -->
+</div>
