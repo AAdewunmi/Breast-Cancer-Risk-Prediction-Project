@@ -1,5 +1,7 @@
 import os
+
 import pytest
+
 
 @pytest.fixture(autouse=True, scope="session")
 def enable_fake_models():

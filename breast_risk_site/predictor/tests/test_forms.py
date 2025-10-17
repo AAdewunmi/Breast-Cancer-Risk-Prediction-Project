@@ -1,6 +1,8 @@
 from io import BytesIO
-from PIL import Image
+
 from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
+
 from predictor.forms import ImagePredictForm
 
 

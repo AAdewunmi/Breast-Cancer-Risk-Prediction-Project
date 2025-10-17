@@ -1,13 +1,16 @@
 # predictor/tests/test_api.py
 from io import BytesIO
-from PIL import Image
-from django.urls import reverse
+
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
+from PIL import Image
+
 
 def _png_bytes():
     buf = BytesIO()
     Image.new("RGB", (8, 8), color=(0, 100, 0)).save(buf, format="PNG")
     return buf.getvalue()
+
 
 def test_api_predict(client):
     f = SimpleUploadedFile("x.png", _png_bytes(), content_type="image/png")

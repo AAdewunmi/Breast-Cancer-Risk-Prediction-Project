@@ -1,18 +1,21 @@
 """Django forms for image upload and risk-factor inputs."""
 
-# predictor/forms.py
 from __future__ import annotations
+
 from django import forms
-from .schemas import MAG_CHOICES, HRT_CHOICES, SMOKE_CHOICES
+
+from .schemas import HRT_CHOICES, MAG_CHOICES, SMOKE_CHOICES
 from .services.preprocess import RiskFactors
+
 
 class ImagePredictForm(forms.Form):
     """UI form: image upload + consent required."""
+
     image = forms.ImageField(required=True)
     magnification = forms.ChoiceField(choices=MAG_CHOICES, required=False)
     consent = forms.BooleanField(
         required=True,
-        label="I understand this is a research prototype and not diagnostic."
+        label="I understand this is a research prototype and not diagnostic.",
     )
 
     def clean_image(self):
@@ -23,12 +26,16 @@ class ImagePredictForm(forms.Form):
             raise forms.ValidationError("Image size must be ≤ 10 MB.")
         return f
 
+
 class ApiImagePredictForm(ImagePredictForm):
     """API variant: consent optional for programmatic access."""
+
     consent = forms.BooleanField(required=False)
+
 
 class RiskFactorsForm(forms.Form):
     """Structured risk factors with basic + cross-field validation."""
+
     age = forms.FloatField(min_value=0, max_value=120)
     first_degree_relative = forms.ChoiceField(choices=[(1, "Yes"), (0, "No")], initial=0)
     onset_age_relative = forms.FloatField(required=False, min_value=0, max_value=120)
@@ -48,23 +55,30 @@ class RiskFactorsForm(forms.Form):
         fdr = int(cleaned.get("first_degree_relative") or 0)
         onset = cleaned.get("onset_age_relative")
         if fdr == 1 and onset is None:
-            self.add_error("onset_age_relative", "Provide onset age when a first-degree relative is selected.")
+            self.add_error(
+                "onset_age_relative",
+                "Provide onset age when a first-degree relative is selected.",
+            )
         return cleaned
 
     def to_dataclass(self) -> RiskFactors:
         cd = self.cleaned_data
+
+        def opt_float(x):
+            return None if x in (None, "") else float(x)
+
         return RiskFactors(
             age=float(cd["age"]),
             first_degree_relative=int(cd["first_degree_relative"]),
-            onset_age_relative=float(cd["onset_age_relative"]) if cd.get("onset_age_relative") is not None else None,
+            onset_age_relative=opt_float(cd.get("onset_age_relative")),
             brca1=1 if cd.get("brca1") else 0,
             brca2=1 if cd.get("brca2") else 0,
-            menarche_age=float(cd["menarche_age"]) if cd.get("menarche_age") is not None else None,
-            menopause_age=float(cd["menopause_age"]) if cd.get("menopause_age") is not None else None,
-            parity=float(cd["parity"]) if cd.get("parity") is not None else None,
+            menarche_age=opt_float(cd.get("menarche_age")),
+            menopause_age=opt_float(cd.get("menopause_age")),
+            parity=opt_float(cd.get("parity")),
             hrt=int(cd["hrt"]),
-            bmi=float(cd["bmi"]) if cd.get("bmi") is not None else None,
-            alcohol_units_per_week=float(cd["alcohol_units_per_week"]) if cd.get("alcohol_units_per_week") is not None else None,
+            bmi=opt_float(cd.get("bmi")),
+            alcohol_units_per_week=opt_float(cd.get("alcohol_units_per_week")),
             smoking_status=int(cd["smoking_status"]),
-            activity_hours_per_week=float(cd["activity_hours_per_week"]) if cd.get("activity_hours_per_week") is not None else None,
+            activity_hours_per_week=opt_float(cd.get("activity_hours_per_week")),
         )

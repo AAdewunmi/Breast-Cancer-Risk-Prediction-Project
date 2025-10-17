@@ -1,7 +1,8 @@
 from io import BytesIO
-from PIL import Image
-from django.urls import reverse
+
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
+from PIL import Image
 
 
 def _png_file():
@@ -17,7 +18,7 @@ def test_predict_post_valid(client):
         data={
             "image": img,
             "magnification": "unknown",
-            "consent": "on",                    # UI form requires consent
+            "consent": "on",  # UI form requires consent
             "age": "52",
             "first_degree_relative": "1",
             "onset_age_relative": "45",

@@ -1,15 +1,21 @@
 """Preprocessing utilities for image and risk-factor inputs."""
 
+# predictor/services/preprocess.py
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple
+
 import io
+from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import Final
+
 import numpy as np
 from PIL import Image
-from tensorflow.keras.applications.densenet import preprocess_input as densenet_preprocess
+from tensorflow.keras.applications.densenet import (
+    preprocess_input as densenet_preprocess,
+)
 
-
-IMG_SIZE: Tuple[int, int] = (224, 224)
+# Prefer built-in tuple[...] over typing.Tuple (Ruff UP006)
+IMG_SIZE: Final[tuple[int, int]] = (224, 224)
 
 
 def load_image_to_array(file_bytes: bytes) -> np.ndarray:
@@ -31,6 +37,7 @@ def preprocess_image_for_densenet(img_rgb: np.ndarray) -> np.ndarray:
 @dataclass(frozen=True)
 class RiskFactors:
     """Typed container for validated risk-factor inputs."""
+
     age: float
     first_degree_relative: int  # 1=yes, 0=no
     onset_age_relative: float | None
@@ -51,7 +58,8 @@ class RiskFactors:
             self.age,
             self.first_degree_relative,
             (self.onset_age_relative or 0.0),
-            self.brca1, self.brca2,
+            self.brca1,
+            self.brca2,
             (self.menarche_age or 0.0),
             (self.menopause_age or 0.0),
             (self.parity or 0.0),

@@ -1,5 +1,5 @@
-# conftest.py
-import os, warnings
+import os
+import warnings
 
 # Silence TF INFO logs like AVX2/FMA + oneDNN
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")

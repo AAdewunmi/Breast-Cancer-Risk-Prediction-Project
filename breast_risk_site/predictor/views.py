@@ -1,22 +1,15 @@
 """Django views for multi-modal breast cancer risk prediction."""
 
 from __future__ import annotations
-from typing import Any, Dict
+
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render
-from django.views import View
-from django.http import JsonResponse, HttpRequest, HttpResponseBadRequest
-from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
-from django.middleware.csrf import get_token
-from django.shortcuts import render
-from .forms import ImagePredictForm, RiskFactorsForm
-from .services.inference import run_image_model, run_factors_model, ensemble
-# predictor/views.py (imports)
-from .forms import ImagePredictForm, ApiImagePredictForm, RiskFactorsForm
-from django.http import JsonResponse, HttpRequest
+from django.views import View
 from django.views.decorators.http import require_http_methods
-from .forms import ApiImagePredictForm, RiskFactorsForm
-from .services.inference import run_image_model, run_factors_model, ensemble
+
+from .forms import ApiImagePredictForm, ImagePredictForm, RiskFactorsForm
+from .services.inference import ensemble, run_factors_model, run_image_model
 
 
 def about(request: HttpRequest):
@@ -36,44 +29,43 @@ def privacy(request: HttpRequest):
 
 @method_decorator(require_http_methods(["GET", "POST"]), name="dispatch")
 class PredictView(View):
-    """Render multi-modal UI and handle POST to compute ensemble."""
+    """Multi-modal UI (image + risk factors) and ensemble inference."""
 
     template_name = "predictor/predict.html"
 
     def get(self, request: HttpRequest):
-        ctx = {
-            "img_form": ImagePredictForm(),
-            "rf_form": RiskFactorsForm(),
-            "csrf_token": get_token(request),
-        }
+        """Display empty forms."""
+        ctx = {"img_form": ImagePredictForm(), "rf_form": RiskFactorsForm()}
         return render(request, self.template_name, ctx)
 
     def post(self, request: HttpRequest):
+        """Validate inputs, run models, and render results."""
         img_form = ImagePredictForm(request.POST, request.FILES)
         rf_form = RiskFactorsForm(request.POST)
 
         if not (img_form.is_valid() and rf_form.is_valid()):
-            return render(request, self.template_name, {"img_form": img_form, "rf_form": rf_form, "errors": True})
+            return render(
+                request,
+                self.template_name,
+                {"img_form": img_form, "rf_form": rf_form, "errors": True},
+            )
 
-        # Image prob
+        # Image probability
         img_file = img_form.cleaned_data["image"]
         p_img = run_image_model(img_file.read())
 
-        # Risk-factors prob
+        # Risk-factor probability
         rf = rf_form.to_dataclass()
         p_fac = run_factors_model(rf)
 
+        # Ensemble
         result = ensemble(p_img=p_img, p_factors=p_fac)
-        ctx = {
-            "img_form": img_form,
-            "rf_form": rf_form,
-            "result": result,
-        }
+        ctx = {"img_form": img_form, "rf_form": rf_form, "result": result}
         return render(request, self.template_name, ctx)
 
 
 @require_http_methods(["POST"])
-def api_predict(request: HttpRequest):
+def api_predict(request: HttpRequest) -> JsonResponse:
     """
     JSON API endpoint to run ensemble prediction.
 
@@ -82,20 +74,22 @@ def api_predict(request: HttpRequest):
       - fields for RiskFactorsForm
 
     Returns JSON:
-      { "p_img": float, "p_factors": float, "p_ensemble": float,
-        "weights": {"image": float, "factors": float} }
+      {
+        "p_img": float,
+        "p_factors": float,
+        "p_ensemble": float,
+        "weights": {"image": float, "factors": float}
+      }
     """
     img_form = ApiImagePredictForm(request.POST, request.FILES)
     rf_form = RiskFactorsForm(request.POST)
 
-    # Invalid payload → JSON 400 with details
     if not img_form.is_valid() or not rf_form.is_valid():
         return JsonResponse(
             {"errors": {"image": img_form.errors, "factors": rf_form.errors}},
             status=400,
         )
 
-    # Happy path
     image_file = request.FILES["image"]
     p_img = run_image_model(image_file.read())
     p_fac = run_factors_model(rf_form.to_dataclass())
@@ -110,4 +104,3 @@ def api_predict(request: HttpRequest):
         },
         status=200,
     )
-

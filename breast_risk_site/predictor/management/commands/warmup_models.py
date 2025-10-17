@@ -1,6 +1,7 @@
 """Warm up model registry by loading models into memory."""
 
 from django.core.management.base import BaseCommand
+
 from predictor.services.registry import ModelRegistry
 
 

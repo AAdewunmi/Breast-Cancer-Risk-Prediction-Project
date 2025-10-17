@@ -1,17 +1,19 @@
 """End-to-end inference & ensemble logic exposed to views and API."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict
-import numpy as np
+
 from django.conf import settings
-from .preprocess import load_image_to_array, preprocess_image_for_densenet, RiskFactors
+
+from .preprocess import RiskFactors, load_image_to_array, preprocess_image_for_densenet
 from .registry import ModelRegistry
 
 
 @dataclass
 class EnsembleResult:
     """Container for per-model and combined probabilities."""
+
     p_img: float
     p_factors: float
     p_ensemble: float
@@ -40,5 +42,10 @@ def ensemble(p_img: float, p_factors: float) -> EnsembleResult:
     z = wi + wf
     wi, wf = wi / z, wf / z
     p = wi * p_img + wf * p_factors
-    return EnsembleResult(p_img=p_img, p_factors=p_factors, p_ensemble=float(p),
-                          img_weight=float(wi), factors_weight=float(wf))
+    return EnsembleResult(
+        p_img=p_img,
+        p_factors=p_factors,
+        p_ensemble=float(p),
+        img_weight=float(wi),
+        factors_weight=float(wf),
+    )
