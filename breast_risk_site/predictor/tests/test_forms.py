@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from io import BytesIO
 
-from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from predictor.forms import ImagePredictForm
+
 
 
 def _png_bytes():

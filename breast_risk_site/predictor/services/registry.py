@@ -1,5 +1,3 @@
-"""Model registry and lazy singletons to avoid repeated loads."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

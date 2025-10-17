@@ -1,9 +1,3 @@
-"""Preprocessing utilities for image and risk-factor inputs.
-
-This module intentionally has *no* Django imports. It can be lazily imported
-from request/worker code so NumPy/PIL/TF only load when needed.
-"""
-
 from __future__ import annotations
 
 import io
