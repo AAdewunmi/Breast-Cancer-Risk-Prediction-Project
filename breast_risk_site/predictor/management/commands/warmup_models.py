@@ -5,7 +5,6 @@ from django.core.management.base import BaseCommand
 from predictor.services.registry import ModelRegistry
 
 
-
 class Command(BaseCommand):
     help = "Load image and risk models so the first request is fast."
 
