@@ -11,6 +11,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         img = ModelRegistry.image_model()
         fac = ModelRegistry.risk_model()
-        self.stdout.write(
-            self.style.SUCCESS(f"Models loaded: {type(img).__name__}, {type(fac).__name__}")
-        )
+        msg = f"Models loaded: {type(img).__name__}, " f"{type(fac).__name__}"
+        self.stdout.write(self.style.SUCCESS(msg))

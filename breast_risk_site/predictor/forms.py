@@ -57,32 +57,22 @@ class RiskFactorsForm(forms.Form):
 
     def to_dataclass(self) -> RiskFactors:
         cd = self.cleaned_data
+
+        def _float_or_none(v):
+            return float(v) if v is not None else None
+
         return RiskFactors(
             age=float(cd["age"]),
             first_degree_relative=int(cd["first_degree_relative"]),
-            onset_age_relative=(
-                float(cd["onset_age_relative"])
-                if cd.get("onset_age_relative") is not None
-                else None
-            ),
+            onset_age_relative=_float_or_none(cd.get("onset_age_relative")),
             brca1=1 if cd.get("brca1") else 0,
             brca2=1 if cd.get("brca2") else 0,
-            menarche_age=float(cd["menarche_age"]) if cd.get("menarche_age") is not None else None,
-            menopause_age=(
-                float(cd["menopause_age"]) if cd.get("menopause_age") is not None else None
-            ),
-            parity=float(cd["parity"]) if cd.get("parity") is not None else None,
+            menarche_age=_float_or_none(cd.get("menarche_age")),
+            menopause_age=_float_or_none(cd.get("menopause_age")),
+            parity=_float_or_none(cd.get("parity")),
             hrt=int(cd["hrt"]),
-            bmi=float(cd["bmi"]) if cd.get("bmi") is not None else None,
-            alcohol_units_per_week=(
-                float(cd["alcohol_units_per_week"])
-                if cd.get("alcohol_units_per_week") is not None
-                else None
-            ),
+            bmi=_float_or_none(cd.get("bmi")),
+            alcohol_units_per_week=_float_or_none(cd.get("alcohol_units_per_week")),
             smoking_status=int(cd["smoking_status"]),
-            activity_hours_per_week=(
-                float(cd["activity_hours_per_week"])
-                if cd.get("activity_hours_per_week") is not None
-                else None
-            ),
+            activity_hours_per_week=_float_or_none(cd.get("activity_hours_per_week")),
         )
