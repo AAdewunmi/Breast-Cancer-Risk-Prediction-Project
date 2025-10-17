@@ -4,10 +4,24 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-# Keep any UI choice lists here too (no heavy deps).
-MAG_CHOICES = [(40, "40x"), (100, "100x")]
-HRT_CHOICES = [(0, "Never"), (1, "Former"), (2, "Current")]
-SMOKE_CHOICES = [(0, "Never"), (1, "Former"), (2, "Current")]
+# Keep any UI choice lists here (no heavy deps).
+MAG_CHOICES = [
+    ("unknown", "Unknown / Not sure"),
+    ("40x", "40×"),
+    ("100x", "100×"),
+]
+
+HRT_CHOICES = [
+    (0, "Never"),
+    (1, "Past"),
+    (2, "Current"),
+]
+
+SMOKE_CHOICES = [
+    (0, "Never"),
+    (1, "Former"),
+    (2, "Current"),
+]
 
 
 @dataclass
