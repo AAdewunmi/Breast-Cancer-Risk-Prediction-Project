@@ -3,6 +3,7 @@
 Deliberately avoids importing TensorFlow so tests can run with fake models
 without heavyweight deps.
 """
+
 from __future__ import annotations
 
 import io

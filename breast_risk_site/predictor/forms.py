@@ -1,4 +1,5 @@
 """Django forms for image upload and risk-factor inputs."""
+
 from __future__ import annotations
 
 from django import forms
@@ -25,12 +26,15 @@ class ImagePredictForm(forms.Form):
 
 class ApiImagePredictForm(ImagePredictForm):
     """Looser variant used by the JSON API; same fields but all optional-friendly."""
+
     # Nothing extra needed; inherits optional magnification and non-required consent
 
 
 class RiskFactorsForm(forms.Form):
     age = forms.FloatField(min_value=0, max_value=120)
-    first_degree_relative = forms.ChoiceField(choices=[(1, "Yes"), (0, "No")], initial=0)
+    first_degree_relative = forms.ChoiceField(
+        choices=[(1, "Yes"), (0, "No")], initial=0
+    )
     onset_age_relative = forms.FloatField(required=False, min_value=0, max_value=120)
     brca1 = forms.BooleanField(required=False, initial=False)
     brca2 = forms.BooleanField(required=False, initial=False)
@@ -41,9 +45,13 @@ class RiskFactorsForm(forms.Form):
 
     hrt = forms.ChoiceField(choices=HRT_CHOICES, initial=0)
     bmi = forms.FloatField(required=False, min_value=8, max_value=70)
-    alcohol_units_per_week = forms.FloatField(required=False, min_value=0, max_value=100)
+    alcohol_units_per_week = forms.FloatField(
+        required=False, min_value=0, max_value=100
+    )
     smoking_status = forms.ChoiceField(choices=SMOKE_CHOICES, initial=0)
-    activity_hours_per_week = forms.FloatField(required=False, min_value=0, max_value=168)
+    activity_hours_per_week = forms.FloatField(
+        required=False, min_value=0, max_value=168
+    )
 
     def clean(self):
         cleaned = super().clean()
@@ -72,7 +80,9 @@ class RiskFactorsForm(forms.Form):
             brca1=1 if cd.get("brca1") else 0,
             brca2=1 if cd.get("brca2") else 0,
             menarche_age=(
-                float(cd["menarche_age"]) if cd.get("menarche_age") is not None else None
+                float(cd["menarche_age"])
+                if cd.get("menarche_age") is not None
+                else None
             ),
             menopause_age=(
                 float(cd["menopause_age"])
