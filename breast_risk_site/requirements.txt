@@ -44,3 +44,4 @@ python-dotenv>=1.0
 # - In headless servers, you can replace opencv-python with opencv-python-headless.
 
 whitenoise
+whitenoise>=6.6,<7
