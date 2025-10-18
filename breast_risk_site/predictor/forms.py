@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django import forms
 
-from .schemas import HRT_CHOICES, MAG_CHOICES, RiskFactors, SMOKE_CHOICES
+from .schemas import HRT_CHOICES, MAG_CHOICES, SMOKE_CHOICES, RiskFactors
 
 
 class ImagePredictForm(forms.Form):

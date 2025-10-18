@@ -7,8 +7,6 @@ without heavyweight deps.
 from __future__ import annotations
 
 import io
-from dataclasses import dataclass  # kept for backward compat if needed
-from typing import Tuple
 
 import numpy as np
 from PIL import Image
@@ -18,7 +16,7 @@ from PIL import Image
 from ..schemas import RiskFactors  # noqa: F401
 
 # Default input size used by the (real) DenseNet201 backbone.
-IMG_SIZE: Tuple[int, int] = (224, 224)
+IMG_SIZE: tuple[int, int] = (224, 224)
 
 
 def load_image_to_array(file_bytes: bytes) -> np.ndarray:
