@@ -22,14 +22,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install black isort ruff pytest pytest-django pillow
-      - name: Black
-        run: |
-          black --check .
-      - name: Ruff
-        run: |
-          python -m pip install ruff
-          python -m ruff check .
-          python -m ruff format --check .
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}/breast_risk_site
@@ -38,4 +30,11 @@ jobs:
           ENABLE_FAKE_MODELS: true
           DEBUG: false
         run: pytest -q --tb=short -c breast_risk_site/pytest.ini
-
+      - name: Black
+        run: |
+          black --check .
+      - name: Ruff
+        run: |
+          python -m pip install ruff
+          python -m ruff check .
+          python -m ruff format --check .  
