@@ -24,12 +24,9 @@ jobs:
           pip install black isort ruff pytest pytest-django pillow
       - name: Run tests
         env:
-          PYTHONPATH: ${{ github.workspace }}/breast_risk_site
           DJANGO_SETTINGS_MODULE: breast_risk_site.settings
-          DJANGO_SECRET_KEY: ci-secret
-          ENABLE_FAKE_MODELS: true
-          DEBUG: false
-        run: pytest -q --tb=short -c breast_risk_site/pytest.ini
+          PYTHONPATH: ${{ github.workspace }}/breast_risk_site
+        run: pytest -q --tb=short -c pytest.ini
       - name: Black
         run: |
           black --check .
