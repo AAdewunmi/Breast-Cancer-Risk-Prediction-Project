@@ -32,10 +32,10 @@ jobs:
           python -m ruff format --check .
       - name: Run tests
         env:
-          PYTHONPATH: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}/breast_risk_site
           DJANGO_SETTINGS_MODULE: breast_risk_site.settings
           DJANGO_SECRET_KEY: ci-secret
           ENABLE_FAKE_MODELS: true
           DEBUG: false
-        run: pytest -q --tb=short
+        run: pytest -q --tb=short -c breast_risk_site/pytest.ini
 
