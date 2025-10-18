@@ -30,6 +30,11 @@ jobs:
           python -m pip install ruff
           python -m ruff check .
           python -m ruff format --check .
-      - name: Tests
-        run: |
-          pytest -q
+      - name: Run tests
+        env:
+          DJANGO_SETTINGS_MODULE: breast_risk_site.settings
+          DJANGO_SECRET_KEY: ci-secret
+          ENABLE_FAKE_MODELS: true
+          DEBUG: false
+        run: pytest -q --tb=short
+
