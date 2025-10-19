@@ -1,0 +1,6 @@
+[run]
+source = predictor
+omit = 
+    tests/*
+    autoapp.py
+

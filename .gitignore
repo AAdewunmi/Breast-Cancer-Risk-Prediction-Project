@@ -1,3 +1,4 @@
+#--Django--
 # --- OS junk ---
 .DS_Store
 Thumbs.db
@@ -95,8 +96,76 @@ yarn-error.log*
 /.venv/
 /.venv310/
 
-# --- Custom ignores ---
-# Add any additional custom ignores below this line
-# For example, to ignore a specific file:
+# --- Flask! ---
 
-This `.gitignore` file covers common files and directories that should be ignored in a Python/Django project, including virtual environments, build artifacts, logs, and specific directories like `/path` and `/.venv`. Adjust as necessary for your specific project needs!
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Flask instance folder
+instance/
+
+# Virtual environment
+venv/
+.env
+.env.*
+
+# Pytest cache
+.pytest_cache/
+.coverage
+
+# mypy
+.mypy_cache/
+
+# Editor and IDE folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Static files build outputs (optional)
+static/dist/
+
+# Misc
+*.bak
+*.tmp
+*.orig
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Pyre type checker
+.pyre/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+.pytest_cache
+.python-version
