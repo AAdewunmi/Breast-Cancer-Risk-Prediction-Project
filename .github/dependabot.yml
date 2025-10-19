@@ -1,0 +1,24 @@
+version: 2
+updates:
+  # Keep Python dependencies (requirements.txt, pip, etc.) up to date
+  - package-ecosystem: "pip"
+    directory: "/"                     # Location of requirements.txt
+    schedule:
+      interval: "weekly"               # Runs every week (change to daily/monthly if you prefer)
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(pip)"
+      include: "scope"
+    reviewers:
+      - "AAdewunmi"
+
+  # Keep GitHub Actions (CI workflows) updated
+  - package-ecosystem: "github-actions"
+    directory: "/"                     # Root directory for workflows
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(actions)"
+      include: "scope"
+    reviewers:
+      - "AAdewunmi"
