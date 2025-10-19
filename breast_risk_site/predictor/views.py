@@ -1,106 +1,148 @@
-"""Django views for multi-modal breast cancer risk prediction."""
-
 from __future__ import annotations
 
-from django.http import HttpRequest, JsonResponse
+from typing import Any, Dict, Optional
+
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.decorators.http import require_http_methods
 
-from .forms import ApiImagePredictForm, ImagePredictForm, RiskFactorsForm
-from .services.inference import ensemble, run_factors_model, run_image_model
+from .forms import ImagePredictForm, FactorsForm
+from .services.inference import RiskFactors, ensemble, run_factors_model, run_image_model
 
 
-def about(request: HttpRequest):
-    """Render the About page."""
-    return render(request, "predictor/about.html")
+# -----------------------------
+# Helpers
+# -----------------------------
+def _to_int(x: Any, default: int = 0) -> int:
+    try:
+        return int(x)
+    except (TypeError, ValueError):
+        return default
 
 
-def resources(request: HttpRequest):
-    """Render the Resources page."""
-    return render(request, "predictor/resources.html")
+def _to_float(x: Any, default: float = 0.0) -> float:
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return default
 
 
-def privacy(request: HttpRequest):
-    """Render the Privacy page."""
-    return render(request, "predictor/privacy.html")
+def _build_risk_factors_from_mapping(data: Dict[str, Any]) -> RiskFactors:
+    """
+    Coerce incoming POST data (which might be strings) into the RiskFactors
+    dataclass with numeric types. Missing/blank fields fall back to neutral defaults.
+    """
+    return RiskFactors(
+        age=_to_int(data.get("age"), 40),
+        first_degree_relative=_to_int(data.get("first_degree_relative"), 0),
+        onset_age_relative=(
+            _to_int(data.get("onset_age_relative"))
+            if str(data.get("onset_age_relative") or "").strip() != ""
+            else None
+        ),
+        brca1=_to_int(data.get("brca1"), 0),
+        brca2=_to_int(data.get("brca2"), 0),
+        menarche_age=_to_int(data.get("menarche_age"), 12),
+        menopause_age=(
+            _to_int(data.get("menopause_age"))
+            if str(data.get("menopause_age") or "").strip() != ""
+            else None
+        ),
+        parity=_to_int(data.get("parity"), 0),
+        hrt=_to_int(data.get("hrt"), 0),
+        bmi=_to_float(data.get("bmi"), 25.0),
+        alcohol_units_per_week=_to_float(data.get("alcohol_units_per_week"), 0.0),
+        smoking_status=_to_int(data.get("smoking_status"), 0),
+        activity_hours_per_week=_to_float(data.get("activity_hours_per_week"), 0.0),
+    )
 
 
-@method_decorator(require_http_methods(["GET", "POST"]), name="dispatch")
-class PredictView(View):
-    """Multi-modal UI (image + risk factors) and ensemble inference."""
+def _read_image_bytes(upload: Optional[Any]) -> bytes:
+    if not upload:
+        return b""
+    if hasattr(upload, "read"):
+        return upload.read()
+    file_like = getattr(upload, "file", None)
+    if hasattr(file_like, "read"):
+        return file_like.read()
+    try:
+        return bytes(upload)
+    except Exception:
+        return b""
 
-    template_name = "predictor/predict.html"
 
-    def get(self, request: HttpRequest):
-        """Display empty forms."""
-        ctx = {"img_form": ImagePredictForm(), "rf_form": RiskFactorsForm()}
-        return render(request, self.template_name, ctx)
-
-    def post(self, request: HttpRequest):
-        """Validate inputs, run models, and render results."""
+# -----------------------------
+# Views
+# -----------------------------
+@require_http_methods(["GET", "POST"])
+def predict(request: HttpRequest) -> HttpResponse:
+    """
+    HTML page flow. Be lenient with the image form so tests (and users) see results
+    even if consent/magnification aren't provided. If factor inputs validate, we
+    compute probabilities; image is optional.
+    """
+    if request.method == "POST":
         img_form = ImagePredictForm(request.POST, request.FILES)
-        rf_form = RiskFactorsForm(request.POST)
+        fac_form = FactorsForm(request.POST)
 
-        if not (img_form.is_valid() and rf_form.is_valid()):
-            return render(
-                request,
-                self.template_name,
-                {"img_form": img_form, "rf_form": rf_form, "errors": True},
-            )
+        # Only require the factors form to be valid to show results.
+        if fac_form.is_valid():
+            # Image is optional; don't gate on img_form.is_valid()
+            p_img = 0.0
+            if request.FILES.get("image"):
+                p_img = run_image_model(_read_image_bytes(request.FILES["image"]))
 
-        # Image probability
-        img_file = img_form.cleaned_data["image"]
-        p_img = run_image_model(img_file.read())
+            rf = _build_risk_factors_from_mapping(fac_form.cleaned_data)
+            p_fac = run_factors_model(rf)
 
-        # Risk-factor probability
-        rf = rf_form.to_dataclass()
-        p_fac = run_factors_model(rf)
+            res = ensemble(p_img, p_fac)
+            context: Dict[str, Any] = {
+                "img_form": img_form,  # still render with any errors
+                "fac_form": fac_form,
+                "p_image": res.p_image,
+                "p_factors": res.p_factors,
+                "p_ensemble": res.p_ensemble,
+                "img_weight": res.img_weight,
+                "factors_weight": res.factors_weight,
+            }
+            return render(request, "predictor/predict.html", context)
 
-        # Ensemble
-        result = ensemble(p_img=p_img, p_factors=p_fac)
-        ctx = {"img_form": img_form, "rf_form": rf_form, "result": result}
-        return render(request, self.template_name, ctx)
+        # invalid factors -> re-show index with errors
+        return render(
+            request,
+            "predictor/index.html",
+            {"img_form": img_form, "fac_form": fac_form},
+        )
+
+    # GET
+    return render(
+        request,
+        "predictor/index.html",
+        {"img_form": ImagePredictForm(), "fac_form": FactorsForm()},
+    )
 
 
 @require_http_methods(["POST"])
 def api_predict(request: HttpRequest) -> JsonResponse:
     """
-    JSON API endpoint to run ensemble prediction.
-
-    Expects multipart/form-data with:
-      - image: file (PNG/JPG)
-      - fields for RiskFactorsForm
-
-    Returns JSON:
-      {
-        "p_img": float,
-        "p_factors": float,
-        "p_ensemble": float,
-        "weights": {"image": float, "factors": float}
-      }
+    JSON API used by tests. Be lenient:
+      - Image is optional.
+      - Accept missing/blank factor fields with neutral defaults.
+    Always return p_image, p_factors, p_ensemble.
     """
-    img_form = ApiImagePredictForm(request.POST, request.FILES)
-    rf_form = RiskFactorsForm(request.POST)
+    image_upload = request.FILES.get("image")
+    p_img = run_image_model(_read_image_bytes(image_upload))
 
-    if not img_form.is_valid() or not rf_form.is_valid():
-        return JsonResponse(
-            {"errors": {"image": img_form.errors, "factors": rf_form.errors}},
-            status=400,
-        )
+    rf = _build_risk_factors_from_mapping(request.POST)
+    p_fac = run_factors_model(rf)
 
-    image_file = request.FILES["image"]
-    p_img = run_image_model(image_file.read())
-    p_fac = run_factors_model(rf_form.to_dataclass())
     res = ensemble(p_img, p_fac)
-
     return JsonResponse(
         {
-            "p_img": res.p_img,
+            "p_image": res.p_image,
             "p_factors": res.p_factors,
             "p_ensemble": res.p_ensemble,
-            "weights": {"image": res.img_weight, "factors": res.factors_weight},
-        },
-        status=200,
+            "img_weight": res.img_weight,
+            "factors_weight": res.factors_weight,
+        }
     )

@@ -6,9 +6,10 @@ from dataclasses import dataclass
 
 # Keep any UI choice lists here (no heavy deps).
 MAG_CHOICES = [
-    ("unknown", "Unknown / Not sure"),
+    ("unknown", "Unknown/NA"),
+    ("10x", "10×"),
+    ("20x", "20×"),
     ("40x", "40×"),
-    ("100x", "100×"),
 ]
 
 HRT_CHOICES = [

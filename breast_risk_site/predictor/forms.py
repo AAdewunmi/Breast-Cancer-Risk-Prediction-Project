@@ -8,20 +8,9 @@ from .schemas import HRT_CHOICES, MAG_CHOICES, SMOKE_CHOICES, RiskFactors
 
 
 class ImagePredictForm(forms.Form):
-    image = forms.ImageField()
-    # Optional; default to "unknown"
-    magnification = forms.ChoiceField(
-        choices=MAG_CHOICES, required=False, initial="unknown"
-    )
-    # If you have a consent box in the UI, keep it non-required so tests don't fail
-    consent = forms.BooleanField(required=False, initial=True)
-
-    def clean_magnification(self) -> str:
-        # Treat missing/blank as "unknown" to keep API and UI resilient
-        value = self.cleaned_data.get("magnification") or "unknown"
-        # Safety: if choices ever change, still fall back to "unknown"
-        valid = {k for k, _ in MAG_CHOICES}
-        return value if value in valid else "unknown"
+    consent = forms.BooleanField(required=True, label="I consent")
+    magnification = forms.ChoiceField(choices=MAG_CHOICES, initial="unknown")
+    image = forms.ImageField(required=True)
 
 
 class ApiImagePredictForm(ImagePredictForm):
@@ -104,3 +93,31 @@ class RiskFactorsForm(forms.Form):
                 else None
             ),
         )
+
+
+class FactorsForm(forms.Form):
+    age = forms.IntegerField(min_value=18, max_value=120, required=False)
+    first_degree_relative = forms.TypedChoiceField(
+        choices=[(0, "No"), (1, "Yes")], coerce=int, required=False
+    )
+    onset_age_relative = forms.IntegerField(min_value=1, max_value=120, required=False)
+    brca1 = forms.TypedChoiceField(
+        choices=[(0, "No"), (1, "Yes")], coerce=int, required=False
+    )
+    brca2 = forms.TypedChoiceField(
+        choices=[(0, "No"), (1, "Yes")], coerce=int, required=False
+    )
+    menarche_age = forms.IntegerField(min_value=8, max_value=25, required=False)
+    menopause_age = forms.IntegerField(min_value=25, max_value=70, required=False)
+    parity = forms.IntegerField(min_value=0, max_value=20, required=False)
+    hrt = forms.TypedChoiceField(choices=HRT_CHOICES, coerce=int, required=False)
+    bmi = forms.FloatField(min_value=10, max_value=80, required=False)
+    alcohol_units_per_week = forms.FloatField(
+        min_value=0, max_value=100, required=False
+    )
+    smoking_status = forms.TypedChoiceField(
+        choices=SMOKE_CHOICES, coerce=int, required=False
+    )
+    activity_hours_per_week = forms.FloatField(
+        min_value=0, max_value=200, required=False
+    )

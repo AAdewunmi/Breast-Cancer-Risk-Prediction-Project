@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "predictor",
+    "predictor.apps.PredictorConfig",
 ]
 
 MIDDLEWARE = [
@@ -52,16 +52,9 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = "breast_risk_site.wsgi.application"
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-# Auto-create in dev/tests so Django stops warning
-if DEBUG:
-    os.makedirs(STATIC_ROOT, exist_ok=True)
-
+STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "predictor" / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Model & inference settings
 MODEL_DIR = Path(os.getenv("MODEL_DIR", BASE_DIR / "models"))
