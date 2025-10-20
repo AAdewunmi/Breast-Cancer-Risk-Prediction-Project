@@ -171,5 +171,8 @@ python3.10
 supervisorctl
 supervisord
 .venv310
+# Environment
+.env
+*.env
 .env.example
 
