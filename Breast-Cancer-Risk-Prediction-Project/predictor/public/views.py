@@ -9,7 +9,7 @@ from flask import (
     request,
     url_for,
 )
-from flask_login import login_required, login_user, logout_user
+# from flask_login import login_required, login_user, logout_user
 
 from predictor.extensions import login_manager
 from predictor.public.forms import LoginForm
