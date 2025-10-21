@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Provide data — Breast Cancer Risk{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <h4 class="card-title">Provide data</h4>
+      <p class="text-muted">Upload a histology image and/or enter risk factors. We'll combine them.</p>
+
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('main.predict') }}">
+        {{ image_form.hidden_tag() }}
+        <div class="mb-4">
+          <h5>Image</h5>
+          <div class="mb-2 form-check">
+            {{ image_form.consent(class="form-check-input") }}
+            <label class="form-check-label">I consent</label>
+          </div>
+          <div class="mb-2">
+            {{ image_form.magnification(class="form-select w-auto d-inline-block me-3") }}
+            {{ image_form.image(class="form-control d-inline-block w-50") }}
+          </div>
+        </div>
+
+        <hr />
+
+        {{ factors_form.hidden_tag() }}
+        <div class="mb-3">
+          <h5>Risk factors</h5>
+          <div class="row">
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">Age</label>
+              {{ factors_form.age(class="form-control") }}
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">BRCA1</label>
+              {{ factors_form.brca1(class="form-select") }}
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">BRCA2</label>
+              {{ factors_form.brca2(class="form-select") }}
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">BMI</label>
+              {{ factors_form.bmi(class="form-control") }}
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">HRT</label>
+              {{ factors_form.hrt(class="form-select") }}
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">Smoking</label>
+              {{ factors_form.smoking(class="form-select") }}
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">Activity hours</label>
+              {{ factors_form.activity_hours(class="form-control") }}
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label small">&nbsp;</label>
+              <div>
+                {{ factors_form.submit(class="btn btn-primary") }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm p-4">
+      <h5>Preview</h5>
+      <p class="text-muted small mb-0">Selected image preview will appear here after upload (JS enhancement planned).</p>
+      <hr />
+      <h6>Notes</h6>
+      <ul class="small">
+        <li>Fields are illustrative — tune to match your model inputs.</li>
+        <li>Prototype: results are synthetic until real models are wired.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
