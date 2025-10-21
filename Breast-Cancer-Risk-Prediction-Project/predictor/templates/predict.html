@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Results — Breast Cancer Risk{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <h4>Results</h4>
+      {% if result %}
+        <p class="small text-muted">Summary: {{ result.summary }}</p>
+
+        <h6 class="mt-3">Ensemble risk</h6>
+        <div class="progress mb-2" style="height:18px;">
+          <div class="progress-bar" role="progressbar" style="width:{{ (result.ensemble * 100)|round(1) }}%;" aria-valuenow="{{ result.ensemble }}" aria-valuemin="0" aria-valuemax="1">
+            {{ (result.ensemble * 100)|round(1) }}%
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <strong>Constituent models</strong>
+          <div class="mt-2 small">
+            <div>Image model: {{ (result.p_image * 100)|round(1) }}% (weight {{ (result.img_weight * 100)|round(0) }}%)</div>
+            <div>Risk-factors model: {{ (result.p_factors * 100)|round(1) }}% (weight {{ (result.factors_weight * 100)|round(0) }}%)</div>
+          </div>
+        </div>
+      {% else %}
+        <p>No result available.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm p-4">
+      <h5>Input</h5>
+      {% if image_path %}
+        <p class="small">Image saved at: <code>{{ image_path }}</code></p>
+      {% else %}
+        <p class="small text-muted">No image uploaded.</p>
+      {% endif %}
+      <hr />
+      <p class="small text-muted">You can go back to <a href="{{ url_for('main.index') }}">edit inputs</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
