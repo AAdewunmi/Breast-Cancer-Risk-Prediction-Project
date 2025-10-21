@@ -1,19 +1,22 @@
-# -*- coding: utf-8 -*-
-"""Extensions module. Each extension is initialized in the app factory located in app.py."""
-from flask_bcrypt import Bcrypt
-from flask_caching import Cache
-from flask_debugtoolbar import DebugToolbarExtension
-from flask_login import LoginManager
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from flask_static_digest import FlaskStaticDigest
-from flask_wtf.csrf import CSRFProtect
+"""Initialize third-party extensions.
 
-bcrypt = Bcrypt()
-csrf_protect = CSRFProtect()
-login_manager = LoginManager()
-db = SQLAlchemy()
-migrate = Migrate()
-cache = Cache()
-debug_toolbar = DebugToolbarExtension()
-flask_static_digest = FlaskStaticDigest()
+Keep extension imports and initialization centralized to avoid circular imports.
+"""
+from flask_wtf import CSRFProtect
+
+# instantiate extension objects here (db, migrate, login_manager etc.)
+csrf = CSRFProtect()
+
+
+def init_extensions(app):
+    """
+    Initialize all Flask extensions with the app.
+
+    Args:
+        app: Flask application instance
+    """
+    csrf.init_app(app)
+    # Example:
+    # db.init_app(app)
+    # migrate.init_app(app, db)
+
