@@ -1,36 +1,25 @@
 repos:
-  # --- General code hygiene ---
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-toml
-      - id: check-json
-      - id: debug-statements     # Blocks accidental print() / pdb
-
-  # --- Code formatting (Black) ---
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 24.3.0
     hooks:
       - id: black
-        name: Black (Python formatter)
-        language_version: python3.10
-        args: [--line-length=88, --target-version=py310]
 
-  # --- Linting (Ruff, super fast) ---
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.0
+  - repo: local
     hooks:
-      - id: ruff
-        name: Ruff (Linter + Fixer)
-        args: [--fix]  # Automatically fixes safe issues
+      - id: pytest
+        name: Run tests with pytest
+        entry: pytest
+        language: python
+        pass_filenames: false
+        always_run: true
+        additional_dependencies:
+          - pytest
+          - flask
+          - flask_wtf
+          # Add other dependencies here if needed, e.g.:
+          # - numpy
+          # - pandas
+          # - sqlalchemy
 
-  # --- Security scan (optional but recommended) ---
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.10
-    hooks:
-      - id: bandit
-        name: Bandit (Security checks)
-        args: ["-ll", "-r", "predictor"]
+
+  

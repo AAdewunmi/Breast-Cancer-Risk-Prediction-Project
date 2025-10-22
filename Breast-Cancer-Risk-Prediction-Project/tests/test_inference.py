@@ -1,6 +1,6 @@
 """Unit tests for inference logic."""
 
-from predictor.inference import run_inference
+from predictor.services.inference import run_inference
 
 
 def test_inference_returns_dict():

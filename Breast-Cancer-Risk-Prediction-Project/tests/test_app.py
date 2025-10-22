@@ -1,5 +1,6 @@
 """Basic smoke tests for Flask app configuration."""
 
+
 def test_app_exists(app):
     """Ensure app is created."""
     assert app is not None

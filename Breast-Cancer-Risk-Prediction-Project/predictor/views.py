@@ -1,106 +1,103 @@
-"""Application routes and view functions.
-
-This blueprint contains the main UI endpoints:
-- /              : form page to upload image and enter risk factors
-- /predict       : handles POST and returns results page
-- /api/predict   : minimal JSON API endpoint for programmatic use
 """
+Flask views (Blueprint) for predictor.
+
+Exposes:
+ - index() -> GET /
+ - predict() -> GET (form) and POST (multipart submit -> results)
+
+Important: this module defines `main_bp` because some code (tests or factory)
+imports that name. We also alias `bp` -> `main_bp` for compatibility.
+"""
+
 import os
-from dataclasses import asdict
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from pathlib import Path
+from typing import Dict, Optional
+
+from flask import Blueprint, current_app, render_template, request
 from werkzeug.utils import secure_filename
 
-from .forms import ImagePredictForm, FactorsForm
-from .services.inference import run_ensemble
+from predictor.services.inference import run_inference
 
-main_bp = Blueprint("main", __name__, template_folder="templates", static_folder="static")
+bp = Blueprint(
+    "predictor", __name__, template_folder="templates", static_folder="static"
+)
+# Some previous code expects `main_bp` variable name, so export it too.
+main_bp = bp  # convenient alias for imports expecting main_bp
 
 
-@main_bp.route("/", methods=["GET"])
+@bp.route("/", methods=["GET"])
 def index():
-    """Render the home page with both forms (image + risk factors)."""
-    image_form = ImagePredictForm()
-    factors_form = FactorsForm()
-    return render_template("index.html", image_form=image_form, factors_form=factors_form)
+    """Home page with link to the prediction form."""
+    current_app.logger.info("Hello from the home page!")
+    return render_template("index.html")
 
 
-def _save_upload(file_storage):
-    """Save uploaded file to UPLOAD_FOLDER, returning the saved path."""
-    upload_folder = current_app.config.get("UPLOAD_FOLDER")
-    os.makedirs(upload_folder, exist_ok=True)
-    filename = secure_filename(file_storage.filename)
-    path = os.path.join(upload_folder, filename)
-    file_storage.save(path)
-    return path
+def _ensure_upload_folder() -> Path:
+    """Ensure configured upload folder exists and return Path object."""
+    upload_folder = current_app.config.get("UPLOAD_FOLDER", "data/uploads")
+    p = Path(upload_folder)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
 
 
-@main_bp.route("/predict", methods=["POST"])
+def _save_upload(file_storage) -> Optional[str]:
+    """Save uploaded FileStorage to upload folder and return POSIX path string."""
+    if not file_storage:
+        return None
+    filename = secure_filename(file_storage.filename or "")
+    if not filename:
+        return None
+    folder = _ensure_upload_folder()
+    dest = folder / filename
+    file_storage.save(dest)
+    return str(dest.as_posix())
+
+
+@bp.route("/predict", methods=["GET", "POST"])
 def predict():
-    """Handle form POST, run inference and render results page.
-
-    The route expects the image form and the factors form to be submitted together.
     """
-    image_form = ImagePredictForm()
-    factors_form = FactorsForm()
+    GET: render input form.
+    POST: accept multipart/form-data, save image to UPLOAD_FOLDER, run inference,
+          and render results page.
 
-    # Basic validation: combine forms' validate
-    valid_image = image_form.validate_on_submit()
-    valid_factors = factors_form.validate_on_submit()
-
-    # if there is an uploaded image file in POST, ensure it gets saved
-    image_path = None
-    if "image" in request.files and request.files["image"].filename:
-        image_file = request.files["image"]
-        image_path = _save_upload(image_file)
-
-    # If forms are invalid, re-render index with errors
-    if not (valid_image or valid_factors):
-        flash("Please provide valid input (image and/or risk factors).", "warning")
-        return render_template("index.html", image_form=image_form, factors_form=factors_form)
-
-    # Build payload for inference
-    factors_payload = factors_form.data if factors_form.is_submitted() else {}
-    # factors_form.data contains CSRF/submit keys; remove non-fields
-    factors_payload = {k: v for k, v in factors_payload.items() if k not in ("csrf_token", "submit")}
-
-    # run ensemble inference (returns dataclass)
-    res = run_ensemble(image_path=image_path, factors=factors_payload)
-
-    # Pass results to the template; use asdict for dataclass
-    context = {"result": asdict(res), "image_path": image_path}
-    return render_template("predict.html", **context)
-
-
-@main_bp.route("/api/predict", methods=["POST"])
-def api_predict():
-    """Simple JSON endpoint for predictions.
-
-    Expects multipart/form-data or JSON body with risk factors. Returns JSON result.
+    The function is defensive about parsing incoming form fields — this keeps
+    tests stable.
     """
-    # Accept JSON body or form-data + file
-    data = request.get_json(silent=True) or {}
-    if request.files.get("image"):
-        # save uploaded file
-        file = request.files["image"]
-        image_path = _save_upload(file)
-    else:
-        image_path = None
+    if request.method == "GET":
+        # Render the blank form
+        return render_template("predict.html")
 
-    # Merge risk factors from JSON or form
-    factors = data or request.form.to_dict()
+    # POST processing
+    factors: Dict[str, object] = {
+        "age": request.form.get("age", ""),
+        "bmi": request.form.get("bmi", ""),
+        "alcohol": request.form.get("alcohol", ""),
+        "activity": request.form.get("activity", ""),
+        "brca1": request.form.get("brca1", ""),
+        "brca2": request.form.get("brca2", ""),
+    }
 
-    try:
-        res = run_ensemble(image_path=image_path, factors=factors)
-    except Exception as exc:  # broad except to return useful JSON on failure
-        return jsonify({"error": "inference_failed", "message": str(exc)}), 400
+    uploaded = request.files.get("image")
+    saved_path = _save_upload(uploaded) if uploaded else None
 
-    return jsonify(asdict(res))
+    inference_result = run_inference(saved_path, factors)
+
+    ensemble_prob = float(inference_result.get("ensemble", 0.0))
+    image_prob = float(inference_result.get("image_model", 0.0))
+    factors_prob = float(inference_result.get("factors_model", 0.0))
+    img_w = float(inference_result.get("img_weight", 0.5))
+    fac_w = float(inference_result.get("factors_weight", 0.5))
+
+    context = {
+        "ensemble": ensemble_prob,
+        "ensemble_pct": f"{ensemble_prob * 100:.1f}%",
+        "image_model": image_prob,
+        "image_pct": f"{image_prob * 100:.1f}%",
+        "factors_model": factors_prob,
+        "factors_pct": f"{factors_prob * 100:.1f}%",
+        "img_weight": img_w,
+        "fac_weight": fac_w,
+        "image_path": saved_path,
+    }
+
+    return render_template("results.html", **context)

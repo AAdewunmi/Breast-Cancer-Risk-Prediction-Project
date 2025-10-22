@@ -1,0 +1,41 @@
+{# Results page: two-column Bootstrap layout. #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <h4>Results (Ensemble)</h4>
+
+      {% if ensemble is defined %}
+        <p class="small text-muted">Summary: {{ ensemble_pct }} — model blend shown below.</p>
+      {% endif %}
+
+      <h6 class="mt-3">Ensemble Risk</h6>
+      <div class="display-6">{{ ensemble_pct }}</div>
+
+      <div class="mt-3">
+        <strong>Constituent models</strong>
+        <div class="mt-2 small">
+          <div>Image Model: {{ image_pct }} (weight {{ (img_weight * 100) | round(1) }}%)</div>
+          <!-- exact label expected by tests -->
+          <div>Risk-Factor Model: {{ factors_pct }} (weight {{ (fac_weight * 100) | round(1) }}%)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm p-4">
+      <h5>Input</h5>
+      {% if image_path %}
+        <p class="small">Image saved at: <code>{{ image_path }}</code></p>
+      {% else %}
+        <p class="small text-muted">No image provided.</p>
+      {% endif %}
+      <hr />
+      <p class="small text-muted">You can go back to <a href="{{ url_for('predictor.index') }}">edit inputs</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

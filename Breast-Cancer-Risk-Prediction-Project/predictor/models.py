@@ -2,6 +2,7 @@
 
 If you add SQLAlchemy, define your declarative models here. Kept empty for now.
 """
+
 # from .extensions import db
 #
 # class ExampleModel(db.Model):

@@ -2,12 +2,14 @@
 
 Placeholders are minimal. Use environment variables in production deployments.
 """
+
 import os
 
 
 class Config:
     """Base config — suitable defaults for local development."""
-    SECRET_KEY = os.environ.get("SECRET_KEY", "devkey")
+
+    SECRET_KEY = "devkey-please-change"
     DEBUG = os.environ.get("FLASK_DEBUG", "0") in ("1", "true", "True")
     TESTING = False
     # Uploads

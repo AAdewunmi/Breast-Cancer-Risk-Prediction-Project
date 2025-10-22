@@ -2,6 +2,7 @@
 
 import io
 
+
 def test_predict_get_request(client):
     """GET /predict should return the prediction form."""
     response = client.get("/predict")

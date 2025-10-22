@@ -8,10 +8,12 @@ from predictor import create_app
 def app():
     """Create and configure a new Flask app instance for testing."""
     app = create_app()
-    app.config.update({
-        "TESTING": True,
-        "WTF_CSRF_ENABLED": False,  # Disable CSRF for test form submissions
-    })
+    app.config.update(
+        {
+            "TESTING": True,
+            "WTF_CSRF_ENABLED": False,  # Disable CSRF for test form submissions
+        }
+    )
     yield app
 
 

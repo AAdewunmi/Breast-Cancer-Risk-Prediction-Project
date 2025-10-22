@@ -5,6 +5,7 @@ Run with:
 or:
     python run.py
 """
+
 from predictor import create_app
 
 app = create_app()

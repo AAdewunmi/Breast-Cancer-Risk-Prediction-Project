@@ -3,6 +3,7 @@
 This file creates the Flask app instance using the factory pattern so
 the application is easy to configure, test, and run under different environments.
 """
+
 from flask import Flask
 from .config import Config
 from .extensions import init_extensions
@@ -39,4 +40,3 @@ def create_app(config_object: str | None = None) -> Flask:
         return "ok", 200
 
     return app
-
