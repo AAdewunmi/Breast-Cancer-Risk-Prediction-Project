@@ -10,7 +10,7 @@ class Config:
     """Base config — suitable defaults for local development."""
 
     SECRET_KEY = "devkey-please-change"
-    DEBUG = os.environ.get("FLASK_DEBUG", "0") in ("1", "true", "True")
+    WTF_CSRF_TIME_LIMIT = None
     TESTING = False
     # Uploads
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "data/uploads")
