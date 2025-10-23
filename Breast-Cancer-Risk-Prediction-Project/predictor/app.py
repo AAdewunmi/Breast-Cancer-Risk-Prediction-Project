@@ -3,7 +3,7 @@
 
 from flask import Flask
 
-from predictor.extensions import init_extensions
+from predictor.extensions import init_extensions, csrf
 from predictor.views import bp as predictor_bp
 
 
