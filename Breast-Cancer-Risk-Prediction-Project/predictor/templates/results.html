@@ -1,4 +1,6 @@
 {# Results page: two-column Bootstrap layout. #}
+{# predictor/templates/results.html #}
+{# predictor/templates/results.html #}
 {% extends "base.html" %}
 
 {% block content %}
@@ -12,13 +14,105 @@
       {% endif %}
 
       <h6 class="mt-3">Ensemble Risk</h6>
-      <div class="display-6">{{ ensemble_pct }}</div>
+
+      <div class="d-flex align-items-baseline">
+        <div class="display-6 me-3">{{ ensemble_pct }}</div>
+
+        {# determine numeric percent for label logic #}
+        {% set _p = None %}
+        {% if ensemble is defined %}
+          {% set _p = (ensemble * 100) %}
+        {% elif ensemble_pct is defined %}
+          {% set _s = ensemble_pct|string %}
+          {% set _s = _s.replace('%', '').strip() %}
+          {% set _p = (_s|float if _s|default('') != '' else 0.0) %}
+        {% else %}
+          {% set _p = 0.0 %}
+        {% endif %}
+
+        {% if _p < 10 %}
+          {% set risk_label = "Very low" %}
+          {% set risk_class = "bg-success" %}
+        {% elif _p < 20 %}
+          {% set risk_label = "Low" %}
+          {% set risk_class = "bg-success" %}
+        {% elif _p < 40 %}
+          {% set risk_label = "Moderate" %}
+          {% set risk_class = "bg-warning text-dark" %}
+        {% elif _p < 70 %}
+          {% set risk_label = "High" %}
+          {% set risk_class = "bg-danger" %}
+        {% else %}
+          {% set risk_label = "Very high" %}
+          {% set risk_class = "bg-danger" %}
+        {% endif %}
+
+        <span class="badge {{ risk_class }} fs-6">{{ risk_label }}</span>
+      </div>
+
+      {# --- Interpretation rendering: handle string or mapping (dict) --- #}
+      <div class="mt-3">
+        {% if interpretation is defined and interpretation %}
+          {# If it's a plain string, render directly #}
+          {% if interpretation is string %}
+            <p class="mb-0">{{ interpretation }}</p>
+
+          {# If it's a mapping (dict), render structured pieces #}
+          {% elif interpretation is mapping %}
+            {# explanation (primary human-friendly text) #}
+            {% if interpretation.explanation is defined %}
+              <p class="mb-1">{{ interpretation.explanation }}</p>
+            {% endif %}
+
+            {# recommended actions list #}
+            {% if interpretation.recommended is defined and interpretation.recommended %}
+              <ul class="small mt-2 mb-1">
+                {% for rec in interpretation.recommended %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
+            {# uncertainty / caveat text #}
+            {% if interpretation.uncertainty is defined %}
+              <p class="small text-muted mb-0"><strong>Uncertainty:</strong> {{ interpretation.uncertainty }}</p>
+            {% endif %}
+
+            {# optional details collapsed for curious users / debugging #}
+            {% if interpretation.details is defined %}
+              <details class="mt-2 small">
+                <summary>Details</summary>
+                <pre class="small">{{ interpretation.details | tojson(indent=2) }}</pre>
+              </details>
+            {% endif %}
+
+          {# fallback: render whatever it is but avoid default dict repr by stringifying sensibly #}
+          {% else %}
+            <p class="mb-0">{{ interpretation }}</p>
+          {% endif %}
+        {% else %}
+          {# no interpretation provided -> default short guidance #}
+          {% if _p is not none %}
+            {% if _p < 10 %}
+              <p class="mb-0 small text-muted">Interpretation: Very low estimated risk. Routine screening and healthy lifestyle recommended.</p>
+            {% elif _p < 20 %}
+              <p class="mb-0 small text-muted">Interpretation: Low estimated risk. Maintain monitoring and preventive care.</p>
+            {% elif _p < 40 %}
+              <p class="mb-0 small text-muted">Interpretation: Moderate estimated risk. Consider discussing with a clinician.</p>
+            {% elif _p < 70 %}
+              <p class="mb-0 small text-muted">Interpretation: High estimated risk. A clinical assessment is recommended.</p>
+            {% else %}
+              <p class="mb-0 small text-muted">Interpretation: Very high estimated risk. Seek prompt clinical evaluation. This is not a diagnosis.</p>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      </div>
+      {# --- end interpretation block --- #}
 
       <div class="mt-3">
         <strong>Constituent models</strong>
         <div class="mt-2 small">
           <div>Image Model: {{ image_pct }} (weight {{ (img_weight * 100) | round(1) }}%)</div>
-          <!-- exact label expected by tests -->
           <div>Risk-Factor Model: {{ factors_pct }} (weight {{ (fac_weight * 100) | round(1) }}%)</div>
         </div>
       </div>
