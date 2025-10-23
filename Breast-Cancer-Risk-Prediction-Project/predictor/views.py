@@ -53,6 +53,111 @@ def _save_upload(file_storage) -> Optional[str]:
     return str(dest.as_posix())
 
 
+def interpret_ensemble(ensemble_prob: float, p_image: float, p_factors: float) -> dict:
+    """
+    Produce a human-friendly interpretation for the ensemble probability.
+
+    Args:
+        ensemble_prob: combined probability in [0,1]
+        p_image: image model probability (0..1)
+        p_factors: risk-factor model probability (0..1)
+
+    Returns:
+        dict with keys:
+        - label: short severity label ("Low", "Moderate", "High", etc.)
+        - explanation: 1-2 sentence plain-language interpretation
+        - recommended: list[str] of recommended next steps (not medical advice)
+        - uncertainty: short note about uncertainty / limitations
+        - details: optional structured details (image/factors contributions)
+    """
+    # Normalize to 0..1 and round for display
+    p = max(0.0, min(1.0, float(ensemble_prob)))
+    pct = p * 100.0
+
+    # Thresholds chosen to be conservative; tweak to match your models / clinical advice
+    if p < 0.10:
+        label = "Very low"
+        explanation = (
+            f"The combined model estimates a very low probability ({pct:.1f}%). "
+            "This suggests low immediate concern based on the provided inputs."
+        )
+        recommended = [
+            "Continue routine screening as recommended by your healthcare provider.",
+            "Maintain healthy lifestyle measures (exercise, healthy weight, reduce alcohol).",
+        ]
+    elif p < 0.30:
+        label = "Low"
+        explanation = (
+            f"The model indicates a low probability ({pct:.1f}%). "
+            "Risk appears below typical clinical thresholds, but individual factors matter."
+        )
+        recommended = [
+            "Follow routine screening schedules (mammograms, clinical checks) appropriate for your age and locale.",
+            "Talk with your GP if you have specific concerns or family history.",
+        ]
+    elif p < 0.60:
+        label = "Moderate"
+        explanation = (
+            f"The model reports a moderate probability ({pct:.1f}%). "
+            "Consider discussing these results with a clinician to place them in context."
+        )
+        recommended = [
+            "Book a consultation with your GP to review risk and next screening steps.",
+            "If family history is strong, ask about genetic counselling or specialist referral.",
+        ]
+    elif p < 0.80:
+        label = "High"
+        explanation = (
+            f"The model suggests a high probability ({pct:.1f}%). "
+            "This is not diagnostic but warrants timely clinical follow-up."
+        )
+        recommended = [
+            "Arrange prompt review with your GP or breast specialist.",
+            "Bring any relevant family history and prior imaging to the appointment.",
+        ]
+    else:
+        label = "Very high"
+        explanation = (
+            f"The model indicates a very high probability ({pct:.1f}%). "
+            "This is a strong signal to seek medical evaluation quickly."
+        )
+        recommended = [
+            "Seek a clinical appointment with a breast specialist without delay.",
+            "Consider expedited imaging and specialist/genetic assessment as appropriate.",
+        ]
+
+    # Small tailored notes about what drove the score
+    contribs = []
+    if p_image > p_factors:
+        contribs.append(
+            f"Image model contributed more ({p_image*100:.0f}% vs {p_factors*100:.0f}%)."
+        )
+    elif p_factors > p_image:
+        contribs.append(
+            f"Risk-factor model contributed more ({p_factors*100:.0f}% vs {p_image*100:.0f}%)."
+        )
+    else:
+        contribs.append("Image and risk-factor models contributed equally.")
+
+    uncertainty = (
+        "This is a prototype prediction. Model outputs are probabilistic estimates — not a diagnosis. "
+        "False positives and false negatives are possible. Always confirm with an appropriate clinician."
+    )
+
+    return {
+        "label": label,
+        "explanation": explanation,
+        "recommended": recommended,
+        "uncertainty": uncertainty,
+        "details": {
+            "ensemble_pct": f"{pct:.1f}%",
+            "image_pct": f"{p_image*100:.1f}%",
+            "factors_pct": f"{p_factors*100:.1f}%",
+            "notes": contribs,
+        },
+    }
+
+
 @bp.route("/predict", methods=["GET", "POST"])
 def predict():
     """
@@ -99,5 +204,8 @@ def predict():
         "fac_weight": fac_w,
         "image_path": saved_path,
     }
+
+    interpretation = interpret_ensemble(ensemble_prob, image_prob, factors_prob)
+    context.update({"interpretation": interpretation})
 
     return render_template("results.html", **context)
