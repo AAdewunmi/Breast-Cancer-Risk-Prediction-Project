@@ -7,6 +7,7 @@
       <h4>Provide Data</h4>
 
       <form method="post" enctype="multipart/form-data" action="{{ url_for('predictor.predict') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3">
           <label class="form-label">Age</label>
           <input class="form-control" name="age" type="number" min="0" />
