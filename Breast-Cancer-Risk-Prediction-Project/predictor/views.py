@@ -99,5 +99,16 @@ def predict():
         "fac_weight": fac_w,
         "image_path": saved_path,
     }
+    # inside predictor/views.py predict() POST branch
+    print("FORM keys:", dict(request.form))
+    print("FILES keys:", request.files.keys())
+    print(
+        "HEADERS:",
+        {
+            k: v
+            for k, v in request.headers.items()
+            if k.startswith("X-") or k == "Cookie"
+        },
+    )
 
     return render_template("results.html", **context)

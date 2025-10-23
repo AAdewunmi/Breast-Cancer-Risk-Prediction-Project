@@ -1,13 +1,12 @@
-"""Initialize third-party extensions.
-
-Keep extension imports and initialization centralized to avoid circular imports.
-"""
+"""Initialize third-party extensions used by the app."""
 
 from flask_wtf import CSRFProtect
 
+# single exported instance used project-wide
 csrf = CSRFProtect()
 
 
 def init_extensions(app):
-    """Attach extensions to the app instance."""
+    """Initialize extensions with the given app instance."""
     csrf.init_app(app)
+    # init other extensions similarly...
