@@ -1,7 +1,7 @@
 
 
 ````markdown
-# 🩺 Breast Cancer Risk Prediction Project
+# 🩺 Breast Cancer Risk Prediction: A Multi-Modal Machine Learning System with a Flask Web App
 
 This repository contains **two related projects** exploring breast cancer risk estimation using machine learning:
 
