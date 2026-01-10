@@ -1,7 +1,7 @@
 
 
 ````markdown
-# 🩺 Breast Cancer Risk Prediction Project
+# Breast Cancer Risk Prediction Project
 
 This repository contains **two related projects** exploring breast cancer risk estimation using machine learning:
 
@@ -11,7 +11,7 @@ This repository contains **two related projects** exploring breast cancer risk e
 
 ---
 
-## 📊 Overview
+## Overview
 
 ### 1. Flask App — Multi-Modal Ensemble
 The web app allows users to upload a mammogram-like image and provide lifestyle or genetic factors to compute an **ensemble probability of risk**.
@@ -35,7 +35,7 @@ It trains and evaluates a CNN-based model on mammogram images, generating metric
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.10+ (recommend using a virtual environment)
@@ -97,7 +97,7 @@ Checks include:
 
 ---
 
-## 🧠 Folder Structure
+## Folder Structure
 
 ```
 Breast-Cancer-Risk-Prediction-Project/
@@ -120,7 +120,7 @@ Breast-Cancer-Risk-Prediction-Project/
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 * Python 3.10+
 * Flask
@@ -132,7 +132,7 @@ Breast-Cancer-Risk-Prediction-Project/
   
 ---
 
-## 🧩 Model Explanation
+## Model Explanation
 
 ### Ensemble Prediction Components
 
@@ -152,11 +152,11 @@ Breast-Cancer-Risk-Prediction-Project/
 | 40–70% | High      | Elevated probability, follow-up advised                  |
 | > 70%  | Very High | Significant model risk; clinical review strongly advised |
 
-> ⚠️ *These outputs are probabilistic and for research or educational use only — not for clinical diagnosis.*
+> *These outputs are probabilistic and for research or educational use only — not for clinical diagnosis.*
 
 ---
 
-## 🎬 Quick Demo
+## Quick Demo
 
 | Input Form |
 |-------------|
@@ -171,7 +171,7 @@ Breast-Cancer-Risk-Prediction-Project/
 
 ---
 
-## 🧑‍💻 Development Notes
+## Development Notes
 
 ### Testing
 
@@ -186,33 +186,21 @@ Breast-Cancer-Risk-Prediction-Project/
 
 ---
 
-## 🤖 Acknowledgements
-
-This project was developed with the assistance of **OpenAI’s ChatGPT**, which supported:
-
-* Code refactoring and docstring generation
-* Automated test and CI setup
-* UI and UX text suggestions
-* Explanation synthesis for interpretability
-
----
-
-## 📚 References
+## References
 
 * Breast Cancer Imaging datasets (for demonstration purposes)
 * Flask Documentation: [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
-* OpenAI ChatGPT: [https://chat.openai.com/](https://chat.openai.com/)
 
 ---
 
-## 🩶 Disclaimer
+## Disclaimer
 
 This project is a **prototype** for educational and research purposes.
 It does **not provide medical advice or diagnosis**. Always consult qualified healthcare professionals for clinical assessment.
 
 ---
 
-## 📄 License
+## License
 
 [MIT License](LICENSE)
 
