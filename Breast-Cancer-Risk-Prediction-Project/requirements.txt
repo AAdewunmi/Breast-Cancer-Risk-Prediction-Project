@@ -10,5 +10,5 @@ Jinja2==3.1.6
 # Forms/CSRF are kept simple with plain HTML; no Flask-WTF required.
 
 # Testing
-pytest==9.1.0
+pytest==9.1.1
 pytest-cov==7.1.0
